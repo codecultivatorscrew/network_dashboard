@@ -1,0 +1,23 @@
+/* TrafficNetwork.css */
+#traffic-network {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow-y: auto;
+    height: 300px; /* Limit height to enable scrolling */
+  }
+  
+  #traffic-log {
+    display: flex;
+    flex-direction: column-reverse; /* Reverse order to show latest log at the top */
+  }
+  
+  .log-entry {
+    padding: 5px 10px;
+    margin-bottom: 5px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
