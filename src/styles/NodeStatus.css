@@ -4,8 +4,15 @@
 }
 
 .network-column {
-  flex: 1;
   padding: 0 10px;
+}
+
+.network-column.column-1 {
+  flex: 1;
+}
+
+.network-column.column-2 {
+  flex: 2;
 }
 
 .sub-box {
@@ -42,6 +49,25 @@
 
 .node-box.error {
   background-color: #ffcccc;
+}
+
+/* Add styles for Active and Idle states */
+.node-box.active {
+  background-color: red;
+  color: white;
+}
+
+.node-box.idle {
+  background-color: green;
+  color: white;
+}
+
+/* Add outline to node connection */
+.node-connection {
+  border: 1px solid #000; /* Black outline */
+  padding: 5px;
+  display: inline-block;
+  margin-top: 5px;
 }
 
 button {
