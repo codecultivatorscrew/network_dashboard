@@ -1,23 +1,24 @@
 /* TrafficNetwork.css */
 #traffic-network {
-    padding: 20px;
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    overflow-y: auto;
-    height: 300px; /* Limit height to enable scrolling */
-  }
-  
-  #traffic-log {
-    display: flex;
-    flex-direction: column-reverse; /* Reverse order to show latest log at the top */
-  }
-  
-  .log-entry {
-    padding: 5px 10px;
-    margin-bottom: 5px;
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-  }
-  
+  padding: 20px;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow-y: auto;
+  height: 500px; /* Increased height for more space */
+  width: 100%;  /* Added width for more space */
+  box-sizing: border-box; /* Ensures padding is included in the element's total width and height */
+}
+
+#traffic-log {
+  display: flex;
+  flex-direction: column-reverse; /* Reverse order to show latest log at the top */
+}
+
+.log-entry {
+  padding: 10px 15px; /* Increased padding for better readability */
+  margin-bottom: 10px; /* Increased margin for better spacing between entries */
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
