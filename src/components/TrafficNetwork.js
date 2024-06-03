@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './TrafficNetwork.css';
+import '../styles/TrafficNetwork.css';
 
 function TrafficNetwork() {
   const [trafficLog, setTrafficLog] = useState([]);
