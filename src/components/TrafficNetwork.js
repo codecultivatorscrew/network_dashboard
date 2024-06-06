@@ -1,26 +1,15 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import '../styles/TrafficNetwork.css';
 
-function TrafficNetwork() {
+function TrafficNetwork({ data }) {
   const [trafficLog, setTrafficLog] = useState([]);
 
-  // Function to add a new log entry
-  const addLog = (log) => {
-    setTrafficLog(prevLog => [...prevLog, log]);
-  };
-
-  // Simulate receiving logs from another program
-  // You can replace this with your actual logic for receiving logs
-  const receiveLogs = () => {
-    const newLogs = ['Received request from Node 1', 'Sent data to Node 2', 'Node 3 disconnected'];
-    newLogs.forEach(log => addLog(log));
-  };
-
-  // Initially, let's simulate receiving logs after component mounts
-  // You can remove this and implement your actual logic
-  useState(() => {
-    receiveLogs();
-  }, []);
+  // Update traffic log when new data is received
+  useEffect(() => {
+    if (data) {
+      setTrafficLog(prevLog => [...prevLog, ...data]);
+    }
+  }, [data]);
 
   return (
     <section id="traffic-network">
