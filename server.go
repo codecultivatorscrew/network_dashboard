@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net"
 	"net/http"
@@ -12,6 +11,8 @@ import (
 	ws "github.com/gorilla/websocket"
 	// "github.com/joho/godotenv"
 )
+
+var upgrader = ws.Upgrader{}
 
 func main() {
 
@@ -38,51 +39,77 @@ func main() {
 	defer logManager.closeLogs()
 
 	// establish listening socket connection
-	main_socket, err := create_main_connection(logManager)
+	mainSocket, err := create_main_connection(logManager)
 	if err != nil {
 		logManager.errorLog.Println(err.Error())
 		os.Exit(1)
 	}
-	defer main_socket.Close()
+	defer mainSocket.Close()
 
-	// start websocket server
-	http.HandleFunc("/stream", func(w http.ResponseWriter, r *http.Request) {
-		var upgrader = ws.Upgrader{}
-		c, err := upgrader.Upgrade(w, r, nil)
-		if err != nil {
-			logManager.errorLog.Println("upgrade:", err)
-			os.Exit(1)
-		}
-		defer c.Close()
-		for {
-			mt, message, err := c.ReadMessage()
-			if err != nil {
-				logManager.errorLog.Println("read:", err)
-				break
-			}
-			logManager.printExecLog(fmt.Sprintf("recv: %s, type: %d", message, mt))
-			// write message to socket
-			var nc net.Conn
-			nc, err = get_new_socket(logManager)
-			if err != nil {
-				logManager.errorLog.Println(err.Error())
-				break
-			}
-			defer nc.Close()
-			var n int
-			n, err = nc.Write([]byte(message))
-			if err != nil {
-				logManager.errorLog.Println("write:", err)
-				break
-			} else {
-				logManager.printExecLog(fmt.Sprintf("sent %d bytes over new socket", n))
-			}
-		}
+	// establish secondary socket connection
+	secondarySocket, err := get_new_socket(logManager)
+	if err != nil {
+		logManager.errorLog.Println(err.Error())
+		os.Exit(1)
+	}
+
+	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		handleWebSocket(logManager, mainSocket, secondarySocket, w, r)
 	})
 
 	err = http.ListenAndServe(":8080", nil)
 	if err != nil {
 		logManager.errorLog.Println(err.Error())
 		os.Exit(1)
+	}
+
+	<-done
+	log.Println("Server shutting down.")
+}
+
+func handleWebSocket(logManager *LogManager, mainSocket net.Conn, secondarySocket net.Conn, w http.ResponseWriter, r *http.Request) {
+	wsConn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		logManager.errorLog.Println("Failed to upgrade HTTP to WebSocket:", err)
+		return
+	}
+	defer wsConn.Close()
+
+	tcpToWebSocket := make(chan []byte)
+	go readFromTCP(mainSocket, tcpToWebSocket, logManager)
+
+	for {
+		select {
+		case message := <-tcpToWebSocket:
+			err := wsConn.WriteMessage(ws.TextMessage, message)
+			if err != nil {
+				logManager.errorLog.Println("Error writing to WebSocket:", err)
+				return
+			}
+		default:
+			_, message, err := wsConn.ReadMessage()
+			if err != nil {
+				logManager.errorLog.Println("Error reading from WebSocket:", err)
+				return
+			}
+			_, err = secondarySocket.Write(message)
+			if err != nil {
+				logManager.errorLog.Println("Error writing to TCP socket:", err)
+				return
+			}
+		}
+	}
+}
+
+func readFromTCP(conn net.Conn, ch chan<- []byte, logManager *LogManager) {
+	buffer := make([]byte, 4096)
+	for {
+		n, err := conn.Read(buffer)
+		if err != nil {
+			logManager.errorLog.Println("Error reading from TCP socket:", err)
+			close(ch)
+			return
+		}
+		ch <- buffer[:n]
 	}
 }
