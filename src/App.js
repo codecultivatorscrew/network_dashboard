@@ -9,13 +9,13 @@ import NetworkStatus from './components/NetworkStatus';
 function App() {
   const [networkStatusData, setNetworkStatusData] = useState(null);
   const [trafficLogData, setTrafficLogData] = useState([]);
-  const [connectionStatus, setConnectionStatus] = useState('Disconnected');
+  const [connectionStatus, setConnectionStatus] = useState(false);
 
   useEffect(() => {
     const ws = new WebSocket('ws://localhost:8080'); // Replace with your WebSocket server URL
 
     ws.onopen = () => {
-      setConnectionStatus('Connected');
+      setConnectionStatus(true);
       console.log('Connected to WebSocket');
     };
 
@@ -32,11 +32,11 @@ function App() {
 
     ws.onerror = (error) => {
       console.error('WebSocket error:', error);
-      setConnectionStatus('Error');
+      setConnectionStatus(false);
     };
 
     ws.onclose = () => {
-      setConnectionStatus('Disconnected');
+      setConnectionStatus(false);
       console.log('Disconnected from WebSocket');
     };
 

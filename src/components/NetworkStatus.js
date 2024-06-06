@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import '../styles/NodeStatus.css';
 
-function ConnectionStatus({ socketStatus, uartStatus, toggleSocketStatus, toggleUartStatus }) {
+function ConnectionStatus({ socketStatus, uartStatus, webSocketStatus }) {
   return (
     <div className="sub-box">
       <h3>Connection Status</h3>
       <div>
-        <p>Socket: <input type="checkbox" checked={socketStatus} onChange={toggleSocketStatus} /></p>
-        <p>UART: <input type="checkbox" checked={uartStatus} onChange={toggleUartStatus} /></p>
+        <p>Web Socket: <input type="checkbox" checked={webSocketStatus} /></p>
+        <p>Socket: <input type="checkbox" checked={socketStatus} /></p>
+        <p>UART: <input type="checkbox" checked={uartStatus} /></p>
       </div>
     </div>
   );
@@ -54,14 +55,9 @@ function NetworkStatus({ webSocketStatus, data }) {
     { id: 1, name: 'Robot Node 1', state: 'Active', node: 'Node-0' },
     { id: 2, name: 'Robot Node 2', state: 'Idle', node: 'N/A' }
   ]);
-  const [socketStatus, setSocketStatus] = useState(true);
-  const [uartStatus, setUartStatus] = useState(true);
+  const [socketStatus, setSocketStatus] = useState(false);
+  const [uartStatus, setUartStatus] = useState(false);
   const [nodesStatus, setNodesStatus] = useState([]);
-
-  // //Remove Node
-  // const removeNode = (id) => {
-  //   setNodes(nodes.filter(node => node.id !== id));
-  // };
 
   //Change node state function, we can modify it laters
   const toggleNodeState = (id) => {
@@ -76,29 +72,9 @@ function NetworkStatus({ webSocketStatus, data }) {
     }));
   };
 
-  const toggleSocketStatus = () => {
-    setSocketStatus(!socketStatus);
-  };
-
-  const toggleUartStatus = () => {
-    setUartStatus(!uartStatus);
-  };
-
-  const updateRobotStatus = (id, newStatus) => {
-    setRobotStatus(robotStatus.map(node => {
-      if (node.id === id) {
-        return { ...node, ...newStatus };
-      }
-      return node;
-    }));
-  };
-
   // Update node status when new data is received
   useEffect(() => {
-    console.log("useEffect is running!"); // Log a message
-    console.log(data)
-    if (data && data.type === 'networkStatus' && data.status === 'nodeStatus') {
-      console.log("I'm in")
+    if (data && data.status === 'nodeStatus') {
       // Generate unique IDs for new nodes based on current length
       const newNodes = data.nodes.map((node, index) => ({
         ...node,
@@ -106,7 +82,17 @@ function NetworkStatus({ webSocketStatus, data }) {
       }));
       setNodesStatus(newNodes);
     }
-  }, [data]);
+    else if (data && data.status === 'connectionStatus') {
+      setSocketStatus(data.socket);
+      setUartStatus(data.uart);
+    }
+    else if (data && data.status === 'robotStatus') {
+      const newRobots = data.robots.map((robot) => ({
+        ...robot
+      }));
+      setRobotStatus(newRobots);
+    }
+  }, [data, nodesStatus.length]);
 
   return (
     <section id="node-status">
@@ -116,8 +102,7 @@ function NetworkStatus({ webSocketStatus, data }) {
           <ConnectionStatus
             socketStatus={socketStatus}
             uartStatus={uartStatus}
-            toggleSocketStatus={toggleSocketStatus}
-            toggleUartStatus={toggleUartStatus}
+            webSocketStatus={webSocketStatus}
           />
           <RobotStatus robotStatus={robotStatus} />
         </div>
