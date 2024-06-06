@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import '../styles/NodeStatus.css';
 
 function ConnectionStatus({ socketStatus, uartStatus, toggleSocketStatus, toggleUartStatus }) {
@@ -31,7 +31,7 @@ function RobotStatus({ robotStatus }) {
   );
 }
 
-function NodeStatus({ nodes, addNode, removeNode, toggleNodeState }) {
+function NodeStatus({ nodes, toggleNodeState }) {
   return (
     <div className="sub-box">
       <h3>Node Status (Count: {nodes.length})</h3>
@@ -41,16 +41,14 @@ function NodeStatus({ nodes, addNode, removeNode, toggleNodeState }) {
             <div className={`node-box ${node.state}`} onClick={() => toggleNodeState(node.id)}>
               {node.name}
             </div>
-            <button onClick={() => removeNode(node.id)}>Remove</button>
           </div>
         ))}
-        <button onClick={addNode}>Add Node</button>
       </div>
     </div>
   );
 }
 
-function NetworkStatus() {
+function NetworkStatus({ webSocketStatus, data }) {
   // Sample data for Robot Status and Connection Status
   const [robotStatus, setRobotStatus] = useState([
     { id: 1, name: 'Robot Node 1', state: 'Active', node: 'Node-0' },
@@ -58,26 +56,16 @@ function NetworkStatus() {
   ]);
   const [socketStatus, setSocketStatus] = useState(true);
   const [uartStatus, setUartStatus] = useState(true);
-  const [nodes, setNodes] = useState([]);
+  const [nodesStatus, setNodesStatus] = useState([]);
 
-  //Add Node
-  const addNode = () => {
-    const newNode = {
-      id: nodes.length + 1,
-      name: `Node ${nodes.length + 1}`,
-      state: Math.random() < 0.5 ? 'normal' : 'error'
-    };
-    setNodes([...nodes, newNode]);
-  };
-
-  //Remove Node
-  const removeNode = (id) => {
-    setNodes(nodes.filter(node => node.id !== id));
-  };
+  // //Remove Node
+  // const removeNode = (id) => {
+  //   setNodes(nodes.filter(node => node.id !== id));
+  // };
 
   //Change node state function, we can modify it laters
   const toggleNodeState = (id) => {
-    setNodes(nodes.map(node => {
+    setNodesStatus(nodesStatus.map(node => {
       if (node.id === id) {
         return {
           ...node,
@@ -105,6 +93,21 @@ function NetworkStatus() {
     }));
   };
 
+  // Update node status when new data is received
+  useEffect(() => {
+    console.log("useEffect is running!"); // Log a message
+    console.log(data)
+    if (data && data.type === 'networkStatus' && data.status === 'nodeStatus') {
+      console.log("I'm in")
+      // Generate unique IDs for new nodes based on current length
+      const newNodes = data.nodes.map((node, index) => ({
+        ...node,
+        id: nodesStatus.length + index + 1 // Generate unique ID
+      }));
+      setNodesStatus(newNodes);
+    }
+  }, [data]);
+
   return (
     <section id="node-status">
       <h2>Network Status</h2>
@@ -120,9 +123,7 @@ function NetworkStatus() {
         </div>
         <div className="network-column column-2">
           <NodeStatus
-            nodes={nodes}
-            addNode={addNode}
-            removeNode={removeNode}
+            nodes={nodesStatus}
             toggleNodeState={toggleNodeState}
           />
         </div>
