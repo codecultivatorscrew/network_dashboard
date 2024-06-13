@@ -77,7 +77,8 @@ function NetworkStatus({ webSocketStatus, data }) {
     if (data && data.status === 'nodeStatus') {
       // Generate unique IDs for new nodes based on current length
       const newNodes = data.nodes.map((node, index) => ({
-        ...node,
+        name: node.name,
+        state: node.status,
         id: nodesStatus.length + index + 1 // Generate unique ID
       }));
       setNodesStatus(newNodes);
