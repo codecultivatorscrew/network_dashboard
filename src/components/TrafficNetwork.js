@@ -7,7 +7,7 @@ function TrafficNetwork({ data }) {
   // Update traffic log when new data is received
   useEffect(() => {
     if (data) {
-      setTrafficLog(prevLog => [...prevLog, ...data]);
+      setTrafficLog(prevLog => [...data, ...prevLog]);
     }
   }, [data]);
 
