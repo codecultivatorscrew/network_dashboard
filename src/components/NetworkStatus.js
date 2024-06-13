@@ -6,9 +6,9 @@ function ConnectionStatus({ socketStatus, uartStatus, webSocketStatus }) {
     <div className="sub-box">
       <h3>Connection Status</h3>
       <div>
-        <p>Web Socket: <input type="checkbox" checked={webSocketStatus} /></p>
-        <p>Socket: <input type="checkbox" checked={socketStatus} /></p>
-        <p>UART: <input type="checkbox" checked={uartStatus} /></p>
+        <p>Web Socket: <input type="checkbox" readOnly checked={webSocketStatus} /></p>
+        <p>Socket: <input type="checkbox" readOnly checked={socketStatus} /></p>
+        <p>UART: <input type="checkbox" readOnly checked={uartStatus} /></p>
       </div>
     </div>
   );

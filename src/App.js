@@ -12,7 +12,7 @@ function App() {
   const [connectionStatus, setConnectionStatus] = useState(false);
 
   useEffect(() => {
-    const ws = new WebSocket('ws://localhost:8080'); // Replace with your WebSocket server URL
+    const ws = new WebSocket('ws://localhost:7654'); // Replace with your WebSocket server URL
 
     ws.onopen = () => {
       setConnectionStatus(true);
