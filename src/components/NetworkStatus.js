@@ -32,14 +32,14 @@ function RobotStatus({ robotStatus }) {
   );
 }
 
-function NodeStatus({ nodes, toggleNodeState }) {
+function NodeStatus({ nodes }) {
   return (
     <div className="sub-box">
       <h3>Node Status (Count: {nodes.length})</h3>
       <div className="node-container">
         {nodes.map(node => (
           <div key={node.id} className="node">
-            <div className={`node-box ${node.state}`} onClick={() => toggleNodeState(node.id)}>
+            <div className={`node-box ${node.state}`}>
               {node.name}
             </div>
           </div>
@@ -58,19 +58,6 @@ function NetworkStatus({ webSocketStatus, data }) {
   const [socketStatus, setSocketStatus] = useState(false);
   const [uartStatus, setUartStatus] = useState(false);
   const [nodesStatus, setNodesStatus] = useState([]);
-
-  //Change node state function, we can modify it laters
-  const toggleNodeState = (id) => {
-    setNodesStatus(nodesStatus.map(node => {
-      if (node.id === id) {
-        return {
-          ...node,
-          state: node.state === 'normal' ? 'error' : 'normal'
-        };
-      }
-      return node;
-    }));
-  };
 
   // Update node status when new data is received
   useEffect(() => {
@@ -110,7 +97,6 @@ function NetworkStatus({ webSocketStatus, data }) {
         <div className="network-column column-2">
           <NodeStatus
             nodes={nodesStatus}
-            toggleNodeState={toggleNodeState}
           />
         </div>
       </div>    
